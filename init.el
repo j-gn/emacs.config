@@ -43,8 +43,8 @@
 ;  (global-unset-key key))
 
 ;; A package for getting the PATH when starting emacs via OSX (not from terminal)
-;(require 'exec-path-from-shell)
-;(exec-path-from-shell-initialize)
+(require 'exec-path-from-shell)
+(exec-path-from-shell-initialize)
 
 ;; UTF-8
 (set-terminal-coding-system 'utf-8)
@@ -354,5 +354,91 @@
   t " keys" 'my-keys-minor-mode-map)
 (my-keys-minor-mode 1)
 
+(defun move-lines (n)
+  (let ((beg) (end) (keep))
+    (if mark-active
+        (save-excursion
+          (setq keep t)
+          (setq beg (region-beginning)
+                end (region-end))
+          (goto-char beg)
+          (setq beg (line-beginning-position))
+          (goto-char end)
+          (setq end (line-beginning-position 2)))
+      (setq beg (line-beginning-position)
+            end (line-beginning-position 2)))
+    (let ((offset (if (and (mark t)
+                           (and (>= (mark t) beg)
+                                (< (mark t) end)))
+                      (- (point) (mark t))))
+          (rewind (- end (point))))
+      (goto-char (if (< n 0) beg end))
+      (forward-line n)
+      (insert (delete-and-extract-region beg end))
+      (backward-char rewind)
+      (if offset (set-mark (- (point) offset))))
+    (if keep
+        (setq mark-active t
+              deactivate-mark nil))))
 
+(defun move-lines-up (n)
+  "move the line(s) spanned by the active region up by N lines."
+  (interactive "*p")
+  (move-lines (- (or n 1))))
+
+(defun move-lines-down (n)
+  "move the line(s) spanned by the active region down by N lines."
+  (interactive "*p")
+  (move-lines (or n 1)))
+
+(global-set-key (kbd "M-<down>") 'move-lines-down)
+(global-set-key (kbd "M-<up>") 'move-lines-up)
+
+
+;; Funktioner för att hantera paranteser
+(require 'smartparens)
+
+(define-key sp-keymap (kbd "C-)") 'sp-forward-slurp-sexp)
+(define-key sp-keymap (kbd "C-(") 'sp-backward-slurp-sexp)
+(define-key sp-keymap (kbd "C-M-)") 'sp-forward-barf-sexp)
+(define-key sp-keymap (kbd "C-M-(") 'sp-backward-barf-sexp)
+
+(define-key sp-keymap (kbd "C-M-k") 'sp-kill-sexp)
+(define-key sp-keymap (kbd "C-M-w") 'sp-copy-sexp)
+(define-key sp-keymap (kbd "C-M-<backspace>") 'sp-unwrap-sexp)
+
+(define-key sp-keymap (kbd "C-M-t") 'sp-transpose-sexp)
+(define-key sp-keymap (kbd "C-M-j") 'sp-join-sexp)
+(define-key sp-keymap (kbd "C-M-s") 'sp-split-sexp)
+
+(sp-pair "'" nil :actions :rem) ; Don't make the single quote open a pair (smart parens do that by default)
+
+
+;; Lisp
+(add-hook 'emacs-lisp-mode-hook 'smartparens-mode)
+(define-key emacs-lisp-mode-map (kbd "<s-return>") 'eval-defun)
+
+
+;; MAGIT!!!!!!!!!!!!!!!!!!!!!!!!
+(require 'magit)
+
+(setq magit-last-seen-setup-instructions "1.4.0")
+
+;; Got a warning on startup about setting this variable:
+(setq magit-auto-revert-mode nil)
+(setq magit-push-always-verify nil)
+
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :magit-fullscreen))
+
+(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)	  
+(global-set-key (kbd "C-x g") 'magit-status)
 
