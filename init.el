@@ -88,14 +88,13 @@
 (put 'downcase-region 'disabled nil)
 
 (desktop-save-mode 1) ; reopen buffers from last session
+;; ASDASD
 
-;(provide 'my-fix-defaults)
+;; (provide 'my-fix-defaults)
+;; LOOK 'N FEEL
 
-;LOOK 'N FEEL
-
-
-; Theme and font
-;(load-theme 'Striptease)
+;; Theme and font
+;; (load-theme 'Striptease)
 (set-face-attribute 'default nil :height 190)
 (let ((font "Source Code Pro")) ;; "Monaco" / "Menlo" / "Hasklig" / "Fira"
   (when (member font (font-family-list))
