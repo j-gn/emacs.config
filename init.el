@@ -1,3 +1,8 @@
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
+(add-to-list 'load-path "~/.emacs.d/")
+
 (setq package-enable-at-startup nil)
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "https://marmalade-repo.org/packages/")
@@ -94,7 +99,8 @@
 ;; LOOK 'N FEEL
 
 ;; Theme and font
-;; (load-theme 'Striptease)
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(load-theme 'Striptease)
 (set-face-attribute 'default nil :height 190)
 (let ((font "Source Code Pro")) ;; "Monaco" / "Menlo" / "Hasklig" / "Fira"
   (when (member font (font-family-list))
@@ -440,4 +446,6 @@
 
 (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)	  
 (global-set-key (kbd "C-x g") 'magit-status)
+
+(require 'my-powerline)
 

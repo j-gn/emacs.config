@@ -24,3 +24,4 @@ abbrev_defs
 /games/
 /.emacs.desktop
 /.emacs.desktop.lock
+/ido.last
